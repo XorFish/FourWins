@@ -2,6 +2,9 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.MenuBar;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -10,12 +13,18 @@ public class FieldCanvas extends Canvas implements MouseListener{
 
 	private char[][] field;
 	private boolean gameOver=false;
-	private  int r;
-	private String winner;
+	private  int _r;
+	private String _winner;
+	private String _player1;
+	private String _player2;
+	private Color _player1Color;
+	private Color _player2Color;
+	
 	private String currentPlayer="blue";
 	int mousePressed=0;
-	 public void drawCilcle (Graphics g, int x, int y) {
-	      g.fillArc(x, y, 2*r, 2*r, 0, 360);
+	
+	public void drawCilcle (Graphics g, int x, int y) {
+	      g.fillArc(x, y, 2*_r, 2*_r, 0, 360);
 	   }
 	public FieldCanvas() {
 		// TODO Auto-generated constructor stub
@@ -26,25 +35,68 @@ public class FieldCanvas extends Canvas implements MouseListener{
 		setRadius(radius);
 		setGameOver(false);
 		addMouseListener(this);
+		_player1="blue";
+		_player2="yellow";
+		setPlayer1Color(Color.blue);
+		setPlayer2Color(Color.yellow);
 		
 	}
+	void setPlayer1(String player1){
+		if(currentPlayer==_player1){
+			currentPlayer=player1;
+		}
+		_player1=player1;
+	}
+	String getPlayer1(){
+		return _player1;
+	}
+	void setPlayer1Color(Color player1Color){
+		_player1Color=player1Color;
+	}
+	Color getPlayer1Color(){
+		return _player1Color;
+	}
+	Color getPlayer2Color(){
+		return _player2Color;
+	}
+	void setPlayer2Color(Color player2Color){
+		_player2Color=player2Color;
+	}
+	
+	String getPlayer2(){
+		return _player2;
+	}
+	void setPlayer2(String player2){
+		if(currentPlayer==_player2){
+			currentPlayer=player2;
+		}
+		_player2=player2;
+	}
+	
 	void setField(char[][] playfield){
 		field=playfield;
 	}
 	void setWinner(String Winner){
-		winner=Winner;
+		_winner=Winner;
 	}
 	void setRadius(int radius){
-		r=radius;
+		_r=radius;
 	}
-	void setCurrentPlayer(String Player){
-		currentPlayer=Player;
+	void setCurrentPlayer(int player){
+		if(player==1){
+			currentPlayer=_player1;
+		} else if(player==2){
+			currentPlayer=_player2;
+		}
 	}
-	void togglePlayer(){
-		if(currentPlayer=="blue"){
-			currentPlayer="red";
+
+	char togglePlayer(){
+		if(currentPlayer==_player1){
+			currentPlayer=_player2;
+			return '1';
 		} else {
-			currentPlayer="blue";
+			currentPlayer=_player1;
+			return '2';
 		}
 	}
 	String getCurrentPlayer(){
@@ -58,56 +110,62 @@ public class FieldCanvas extends Canvas implements MouseListener{
 	}
 	public void paint (Graphics graphics) {
 		if(getWidth()<getHeight()-30){
-			setRadius(getWidth()/16);
+			setRadius(getWidth()/14);
 		} else {
-			setRadius((getHeight()-30)/16);
+			setRadius((int)((getHeight()-30)/14.5));
 		}
 		Image image=createImage(getWidth(),getHeight());
 		Graphics g=image.getGraphics();
+		g.setColor(Color.lightGray);
+		
+		g.fillRoundRect(_r*10, _r*14+2, 4*_r,_r,_r/4, _r/4);
+		g.setColor(Color.BLACK);
+		g.drawString("Restart", _r*10+_r/2, _r*14+2+_r/2+4);
 	   	  /* Display the vertical lines */
+		
 	   	  for (int i = 1; i < 8; i++) {
-	   	     g.drawLine(2*r*i, 0, 2*r*i, 14*r);
+	   	     g.drawLine(2*_r*i, 0, 2*_r*i, 14*_r);
 	   	  }
 	   	  
 	   	  /* Display the horizontal lines */
 	   	  for (int i = 1; i < 8; i++) {
-	  	     g.drawLine(0, 2*r*i, 14*r, 2*r*i);
+	  	     g.drawLine(0, 2*_r*i, 14*_r, 2*_r*i);
 	  	  }
 	   	
 	   	  /* Display the characters  */
 	   	  for (int i = 0; i < 7; i++) {
 		     for (int j = 0; j < 7; j++) {
-	            if (field[i][j] == 'r') {
-	            	g.setColor(Color.red);
-					drawCilcle (g, 2*i*r, 2*j*r);
+	            if (field[i][j] == '1') {
+	            	g.setColor(_player1Color);
+					drawCilcle (g, 2*i*_r, 2*j*_r);
 					
 				}
-	            if (field[i][j] == 'b') {
-	            	g.setColor(Color.blue);
-	            	drawCilcle (g, 2*i*r, 2*j*r);
+	            if (field[i][j] == '2') {
+	            	g.setColor(_player2Color);
+	            	drawCilcle (g, 2*i*_r, 2*j*_r);
 				}
 	         }
 	      }
 	   	  
 	   	  /* Display the stat of the game */
 	   	  if (gameOver == true) {
-		     if(winner=="blue") {
-	   			  g.setColor(Color.blue);
-	   			  g.drawString("Das Spiel ist zu ende", 5,r*14+15);
-	   			  g.drawString("blau hat gewonnen", 5, r*14+30);
+		     if(_winner==_player1) {
+	   			  g.setColor(_player1Color);
+	   			  g.drawString("Game Over", 5,_r*14+15);
+	   			  g.drawString("Player " +_player1+" wins", 5, _r*14+30);
 	   			  
-	   		} else if(winner=="red") {
-	   			g.setColor(Color.red);
-	   			g.drawString("Das Spiel ist zu ende", 5,r*14+15);
-	   			g.drawString("rot hat gewonnen", 5, r*14+30);
+	   		} else if(_winner==_player2) {
+	   			g.setColor(_player2Color);
+	   			g.drawString("Game Over", 5,_r*14+15);
+	   			g.drawString("Player " +_player2+" wins", 5, _r*14+30);
 	   		}
 	   	  } else {
-	   		 if(currentPlayer=="blue"){
-	   			 g.setColor(Color.blue);
+	   		 if(currentPlayer==_player1){
+	   			 g.setColor(_player1Color);
 	   		 } else {
-	   			 g.setColor(Color.red);
+	   			 g.setColor(_player2Color);
 	   		 }
-	   	     g.drawString(currentPlayer + " ist an der Reihe", 5, r*14+15);
+	   	     g.drawString(currentPlayer + "'s turn", 5, _r*14+15);
 	   	  }
 	   	  graphics.drawImage(image, 0, 0, getWidth(), getHeight(), this);
 	   	  
@@ -116,15 +174,12 @@ public class FieldCanvas extends Canvas implements MouseListener{
 	
 	public void mouseClicked(MouseEvent event) {
 	   }
-
-	   public void mouseEntered(MouseEvent event) {
-	   }
-
-	   public void mouseExited(MouseEvent event) {
-	   }
-
-	   public void mousePressed(MouseEvent event) {
-	   	  int x = event.getX() / (2*r);
+	public void mouseEntered(MouseEvent event) {
+	 }
+	public void mouseExited(MouseEvent event) {
+	 }
+	public void mousePressed(MouseEvent event) {
+	   	  int x = event.getX() / (2*_r);
 
 	      /* Do the player choose a valid play field ? */
 	      if ((x < 7)) {
@@ -142,8 +197,7 @@ public class FieldCanvas extends Canvas implements MouseListener{
 	                
 				/* Put the character in to the play field  */
 	      	    if(nextfree<7){
-	      	    	field [x][nextfree] = getCurrentPlayer().charAt(0);	
-	                togglePlayer();
+	      	    	field [x][nextfree] = togglePlayer();
 	         	    /* Increment the number of played characters */
 	         	    mousePressed++;
 	      	     }
@@ -159,10 +213,16 @@ public class FieldCanvas extends Canvas implements MouseListener{
 	  	  		togglePlayer();
 	  	  		setWinner(getCurrentPlayer());
 	  	  	}
+	  	  	if((event.getX() >= _r * 10) && (event.getX() <= 14 * _r) && (event.getY() >= _r * 14 + 2) && (event.getY() <= _r * 15 + 2)){
+	  	  		field=new char [7][7];
+	  	  		gameOver=false;
+	  	  		mousePressed=0;
+	  	  		togglePlayer();
+	  	  	}
 	  	  	repaint();
 	      }
 	   }
-	   public char checkWinner () {
+	public char checkWinner () {
 		     /* Check the columns */  
 			 char old='n';
 			 int same=1;
@@ -196,8 +256,6 @@ public class FieldCanvas extends Canvas implements MouseListener{
 				 }
 				 old='n';      
 		      }
-		      
-		     
 		      /* Check the diagonals */  
 			 for(int i=0;i<4;++i){
 		   	  for(int j=0;j<4;++j){
@@ -243,7 +301,5 @@ public class FieldCanvas extends Canvas implements MouseListener{
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
-	}
-
+	}	
 }
